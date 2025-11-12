@@ -115,3 +115,20 @@ base_directory = os.getcwd()
 create_structure(base_directory, structure)
 
 print(f"✅ Folder structure created successfully in: {base_directory}")
+
+# run_demo.py
+from traffic_signal_control.infrastructure.simulator import SimulatorFactory
+from traffic_signal_control.infrastructure.environment.traffic_env import TrafficEnv
+from traffic_signal_control.infrastructure.agent.dqn_agent import DQNAgent
+
+sim = SimulatorFactory.create('simple', seed=42)
+env = TrafficEnv(simulator=sim, config={'max_steps_per_episode': 50})
+state = env.reset()
+agent = DQNAgent(state_size=env.state_encoder.TOTAL_STATE_SIZE, action_size=11)
+for i in range(10):
+    action = agent.select_action(state, training=False)
+    next_state, reward, done, info = env.step(action)
+    print(f"step={i} reward={reward:.2f} queue={info.get('queue_sizes')}")
+    state = next_state
+    if done:
+        break
